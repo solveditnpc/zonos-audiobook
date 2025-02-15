@@ -40,7 +40,7 @@ Zonos follows a straightforward architecture: text normalization and phonemizati
 
 ## Usage
 
-### Python
+### Basic Text-to-Speech
 
 ```python
 import torch
@@ -63,6 +63,29 @@ wavs = model.autoencoder.decode(codes).cpu()
 torchaudio.save("sample.wav", wavs[0], model.autoencoder.sampling_rate)
 ```
 
+### PDF to Audio Conversion
+
+The repository includes a script to convert PDF documents to audio files. To use it:
+
+1. Place your PDF files in the `input` folder
+2. Run the conversion script:
+```bash
+python audio_book.py
+```
+3. Follow the interactive prompts to:
+   - Select a PDF file (if multiple files are present)
+   - Choose the page range to convert
+   - Wait for the conversion to complete
+
+The script will create audio files in the `output` folder, with filenames indicating the page range (e.g., `document_pages_1-5.wav`).
+
+Features:
+- Interactive PDF selection
+- Page range selection
+- Intelligent text chunking for natural speech
+- Progress tracking
+- Uses the same high-quality voice cloning as the base model
+
 ### Gradio interface (recommended)
 
 ```bash
@@ -81,6 +104,7 @@ _For repeated sampling we highly recommend using the gradio interface instead, a
 - Multilingual support: Zonos-v0.1 supports English, Japanese, Chinese, French, and German
 - Audio quality and emotion control: Zonos offers fine-grained control of many aspects of the generated audio. These include speaking rate, pitch, maximum frequency, audio quality, and various emotions such as happiness, anger, sadness, and fear.
 - Fast: our model runs with a real-time factor of ~2x on an RTX 4090 (i.e. generates 2 seconds of audio per 1 second of compute time)
+- PDF to Audio conversion: Convert PDF documents to natural-sounding audio files with support for page range selection and intelligent text chunking
 - Gradio WebUI: Zonos comes packaged with an easy to use gradio interface to generate speech
 - Simple installation and deployment: Zonos can be installed and deployed simply using the docker file packaged with our repository.
 
@@ -92,10 +116,14 @@ See also [Docker Installation](#docker-installation)
 
 #### System dependencies
 
-Zonos depends on the eSpeak library phonemization. You can install it on Ubuntu with the following command:
+Zonos requires the following system dependencies:
 
 ```bash
+# For phonemization
 apt install -y espeak-ng
+
+# For PDF processing
+pip install PyPDF2 tqdm
 ```
 
 #### Python dependencies
