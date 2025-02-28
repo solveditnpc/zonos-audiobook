@@ -44,7 +44,7 @@ Zonos follows a straightforward architecture: text normalization and phonemizati
 
 The repository includes a script to convert PDF documents to audio files. To use it:
 
-0. you can add an exampleaudio.mp3(with this exact name) file of the voice you want the model to speak in the assets[assets/exampleaudio.mp3] folder
+0. you can add an exampleaudio.mp3(with this exact name) file of the voice you want the model to speak in the [assets](assets/exampleaudio.mp3) folder
 1. Place your PDF files in the `input` folder
 2. Run the conversion script:
 ```bash
