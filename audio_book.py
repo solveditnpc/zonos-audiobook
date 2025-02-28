@@ -33,6 +33,11 @@ class PDFToAudio:
     def create_speaker_embedding(self, reference_audio="assets/exampleaudio.mp3"):
         """Create speaker embedding from reference audio."""
         wav, sampling_rate = torchaudio.load(reference_audio)
+        # Ensure wav has correct dimensionality (2D)
+        if wav.ndim < 2:
+            wav = wav.unsqueeze(0)  # Add channel dimension if missing
+        elif wav.ndim > 2:
+            wav = wav.mean(0, keepdim=True)  # Average channels if too many
         return self.model.make_speaker_embedding(wav, sampling_rate)
 
     def smart_text_split(self, text, max_chars=200):
@@ -102,6 +107,9 @@ class PDFToAudio:
             
             # Decode to waveform
             wav = self.model.autoencoder.decode(codes).cpu()
+            # Ensure wav has correct dimensionality
+            if wav.ndim == 2 and wav.size(0) > 1:
+                wav = wav[0:1]  # Take only the first channel
             all_wavs.append(wav[0])
 
         # Concatenate all wave chunks
