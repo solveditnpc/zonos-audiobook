@@ -40,33 +40,10 @@ Zonos follows a straightforward architecture: text normalization and phonemizati
 
 ## Usage
 
-### Basic Text-to-Speech
-
-```python
-import torch
-import torchaudio
-from zonos.model import Zonos
-from zonos.conditioning import make_cond_dict
-
-# model = Zonos.from_pretrained("Zyphra/Zonos-v0.1-hybrid", device="cuda")
-model = Zonos.from_pretrained("Zyphra/Zonos-v0.1-transformer", device="cuda")
-
-wav, sampling_rate = torchaudio.load("assets/exampleaudio.mp3")
-speaker = model.make_speaker_embedding(wav, sampling_rate)
-
-cond_dict = make_cond_dict(text="Hello, world!", speaker=speaker, language="en-us")
-conditioning = model.prepare_conditioning(cond_dict)
-
-codes = model.generate(conditioning)
-
-wavs = model.autoencoder.decode(codes).cpu()
-torchaudio.save("sample.wav", wavs[0], model.autoencoder.sampling_rate)
-```
-
 ### PDF to Audio Conversion
 
 The repository includes a script to convert PDF documents to audio files. To use it:
-
+0. you can add an exampleaudio.mp3(with this exact name) file of the voice you want the model to speak in the assets folder
 1. Place your PDF files in the `input` folder
 2. Run the conversion script:
 ```bash
@@ -86,7 +63,7 @@ Features:
 - Progress tracking
 - Uses the same high-quality voice cloning as the base model
 
-### Gradio interface (recommended)
+### Gradio interface(does not have pdf to audio conversion feature)
 
 ```bash
 uv run gradio_interface.py
