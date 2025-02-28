@@ -107,15 +107,17 @@ class PDFToAudio:
             
             # Decode to waveform
             wav = self.model.autoencoder.decode(codes).cpu()
-            # Ensure wav has correct dimensionality
-            if wav.ndim == 2 and wav.size(0) > 1:
-                wav = wav[0:1]  # Take only the first channel
-            all_wavs.append(wav[0])
+            all_wavs.append(wav)
 
         # Concatenate all wave chunks
         if all_wavs:
-            final_wav = torch.cat(all_wavs, dim=-1)
-            torchaudio.save(output_path, final_wav.unsqueeze(0), self.model.autoencoder.sampling_rate)
+            final_wav = torch.cat(all_wavs, dim=1)  # Concatenate along time dimension
+            # Ensure the tensor is 2D [channels, time]
+            if final_wav.ndim != 2:
+                final_wav = final_wav.squeeze()  # Remove any extra dimensions
+                if final_wav.ndim == 1:
+                    final_wav = final_wav.unsqueeze(0)  # Add channel dimension if needed
+            torchaudio.save(output_path, final_wav, self.model.autoencoder.sampling_rate)
             return True
         return False
 
