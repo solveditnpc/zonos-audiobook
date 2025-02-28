@@ -6,6 +6,8 @@ import torch
 import torchaudio
 from zonos.model import Zonos
 from zonos.conditioning import make_cond_dict
+import tempfile
+import subprocess
 
 class PDFToAudio:
     def __init__(self, model_name="Zyphra/Zonos-v0.1-transformer", device="cuda"):
@@ -89,37 +91,72 @@ class PDFToAudio:
         # Split text into smaller chunks intelligently
         text_chunks = self.smart_text_split(text)
         
-        all_wavs = []
-        for chunk in tqdm(text_chunks, desc="Converting to speech"):
-            if not chunk.strip():  # Skip empty chunks
-                continue
+        # Create a temporary directory for audio chunks
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_dir_path = Path(temp_dir)
+            chunk_files = []
             
-            # Create conditioning dictionary for the chunk
-            cond_dict = make_cond_dict(
-                text=chunk,
-                speaker=speaker_embedding,
-                language=language
-            )
-            conditioning = self.model.prepare_conditioning(cond_dict)
+            # Process each chunk individually
+            for i, chunk in enumerate(tqdm(text_chunks, desc="Converting to speech")):
+                if not chunk.strip():  # Skip empty chunks
+                    continue
+                
+                # Create conditioning dictionary for the chunk
+                cond_dict = make_cond_dict(
+                    text=chunk,
+                    speaker=speaker_embedding,
+                    language=language
+                )
+                conditioning = self.model.prepare_conditioning(cond_dict)
+                
+                # Generate audio codes
+                codes = self.model.generate(conditioning)
+                
+                # Decode to waveform
+                wav = self.model.autoencoder.decode(codes).cpu()
+                
+                # Ensure wav is 2D [channels, time]
+                if wav.ndim > 2:
+                    wav = wav.squeeze()
+                if wav.ndim == 1:
+                    wav = wav.unsqueeze(0)
+                
+                # Save this chunk to a temporary file
+                chunk_path = temp_dir_path / f"chunk_{i:04d}.wav"
+                torchaudio.save(chunk_path, wav, self.model.autoencoder.sampling_rate)
+                chunk_files.append(chunk_path)
+                
+                # Add a small pause after sentences
+                if chunk.strip()[-1] in '.!?':
+                    pause_path = temp_dir_path / f"pause_{i:04d}.wav"
+                    pause_length = int(0.2 * self.model.autoencoder.sampling_rate)
+                    pause = torch.zeros(1, pause_length)
+                    torchaudio.save(pause_path, pause, self.model.autoencoder.sampling_rate)
+                    chunk_files.append(pause_path)
             
-            # Generate audio codes
-            codes = self.model.generate(conditioning)
+            if chunk_files:
+                # Create a file list for ffmpeg
+                list_file = temp_dir_path / "files.txt"
+                with open(list_file, "w") as f:
+                    for chunk_file in chunk_files:
+                        f.write(f"file '{chunk_file.absolute()}'\n")
+                
+                # Use ffmpeg to concatenate all files
+                try:
+                    subprocess.run([
+                        "ffmpeg", "-y",  # -y to overwrite output file
+                        "-f", "concat",  # concat format
+                        "-safe", "0",    # don't restrict paths
+                        "-i", str(list_file),  # input file list
+                        "-c", "copy",    # copy codec (no re-encoding)
+                        str(output_path)  # output file
+                    ], check=True, capture_output=True)
+                    return True
+                except subprocess.CalledProcessError as e:
+                    print(f"Error concatenating audio files: {e.stderr.decode()}")
+                    return False
             
-            # Decode to waveform
-            wav = self.model.autoencoder.decode(codes).cpu()
-            all_wavs.append(wav)
-
-        # Concatenate all wave chunks
-        if all_wavs:
-            final_wav = torch.cat(all_wavs, dim=1)  # Concatenate along time dimension
-            # Ensure the tensor is 2D [channels, time]
-            if final_wav.ndim != 2:
-                final_wav = final_wav.squeeze()  # Remove any extra dimensions
-                if final_wav.ndim == 1:
-                    final_wav = final_wav.unsqueeze(0)  # Add channel dimension if needed
-            torchaudio.save(output_path, final_wav, self.model.autoencoder.sampling_rate)
-            return True
-        return False
+            return False
 
 def get_pdf_info(pdf_path):
     """Get information about a PDF file."""
