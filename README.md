@@ -48,7 +48,7 @@ The repository includes a script to convert PDF documents to audio files. To use
 1. Place your PDF files in the `input` folder
 2. Run the conversion script:
 ```bash
-python audio_book.py
+uv run audio_book.py
 ```
 3. Follow the interactive prompts to:
    - Select a PDF file (if multiple files are present)
@@ -99,9 +99,6 @@ Zonos requires the following system dependencies:
 ```bash
 # For phonemization
 apt install -y espeak-ng
-
-# For PDF processing
-pip install PyPDF2 tqdm
 ```
 
 #### Python dependencies
@@ -122,13 +119,6 @@ uv pip install -e .
 uv pip install -e .[compile]
 ```
 
-##### Installing into the system/actived environment using pip
-
-```bash
-pip install -e .
-pip install --no-build-isolation -e .[compile]
-```
-
 ##### Confirm that it's working
 
 For convenience we provide a minimal example to check that the installation works:
@@ -136,6 +126,14 @@ For convenience we provide a minimal example to check that the installation work
 ```bash
 uv run sample.py
 # python sample.py
+```
+
+##### Now you can convert pdfs into audiobooks using
+
+(you can add any custom voice you like, follow the PDF To Audio Conversion steps above)
+
+```bash
+uv run audio_book.py  
 ```
 
 ## Docker installation
