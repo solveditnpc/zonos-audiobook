@@ -94,6 +94,8 @@ See also [Docker Installation](#docker-installation)
 
 #### System dependencies
 
+## Ensure that the python version is 3.11.x or 3.12.x for error free installation 
+
 Zonos requires the following system dependencies:
 
 ```bash
