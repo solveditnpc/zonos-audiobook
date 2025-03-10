@@ -1,4 +1,5 @@
 version = 1
+revision = 1
 requires-python = ">=3.10"
 resolution-markers = [
     "python_full_version >= '3.13'",
@@ -1322,6 +1323,15 @@ wheels = [
 ]
 
 [[package]]
+name = "pypdf2"
+version = "3.0.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/9f/bb/18dc3062d37db6c491392007dfd1a7f524bb95886eb956569ac38a23a784/PyPDF2-3.0.1.tar.gz", hash = "sha256:a74408f69ba6271f71b9352ef4ed03dc53a31aa404d29b5d31f53bfecfee1440", size = 227419 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/8e/5e/c86a5643653825d3c913719e788e41386bee415c2b87b4f955432f2de6b2/pypdf2-3.0.1-py3-none-any.whl", hash = "sha256:d16e4205cfee272fbdc0568b68d82be796540b1537508cef59388f839c191928", size = 232572 },
+]
+
+[[package]]
 name = "python-dateutil"
 version = "2.9.0.post0"
 source = { registry = "https://pypi.org/simple" }
@@ -2113,12 +2123,14 @@ dependencies = [
     { name = "numpy" },
     { name = "packaging" },
     { name = "phonemizer" },
+    { name = "pypdf2" },
     { name = "setuptools" },
     { name = "soundfile" },
     { name = "sudachidict-full" },
     { name = "sudachipy" },
     { name = "torch" },
     { name = "torchaudio" },
+    { name = "tqdm" },
     { name = "transformers" },
 ]
 
@@ -2141,11 +2153,14 @@ requires-dist = [
     { name = "numpy", specifier = ">=2.2.2" },
     { name = "packaging" },
     { name = "phonemizer", specifier = ">=3.3.0" },
+    { name = "pypdf2", specifier = ">=3.0.1" },
     { name = "setuptools" },
     { name = "soundfile", specifier = ">=0.13.1" },
     { name = "sudachidict-full", specifier = ">=20241021" },
     { name = "sudachipy", specifier = ">=0.6.10" },
     { name = "torch", specifier = ">=2.5.1" },
     { name = "torchaudio", specifier = ">=2.5.1" },
+    { name = "tqdm", specifier = ">=4.66.0" },
     { name = "transformers", specifier = ">=4.48.1" },
 ]
+provides-extras = ["compile"]
